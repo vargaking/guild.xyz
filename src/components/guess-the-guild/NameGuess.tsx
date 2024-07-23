@@ -12,18 +12,28 @@ import { GuildBase } from "types"
 type Props = {
   guild: GuildBase
   guildOptions: string[]
+  correctAction: (score: number) => void
+  restartEvent: () => void
 }
 
-const NameGuess = ({ guild, guildOptions }: Props) => {
+const NameGuess = ({ guild, guildOptions, correctAction, restartEvent }: Props) => {
   const bgColor = useColorModeValue("var(--chakra-colors-gray-100)", "#343439")
 
   const [correctButtonIndex, setCorrectButtonIndex] = useState(-1)
 
   const [incorrectButtonIndex, setIncorrectButtonIndex] = useState(-1)
 
+  // for debugging
+  console.log(guild, "current guild")
+
   const guessName = (name: string, index: number) => {
     if (name === guild.name) {
       setCorrectButtonIndex(index)
+
+      setTimeout(() => {
+        setCorrectButtonIndex(-1)
+        correctAction(1)
+      }, 1000)
     } else {
       setIncorrectButtonIndex(index)
       setCorrectButtonIndex(
@@ -65,6 +75,12 @@ const NameGuess = ({ guild, guildOptions }: Props) => {
               {option}
             </Button>
           ))}
+
+          {incorrectButtonIndex !== -1 && (
+            <Button onClick={restartEvent} colorScheme="blue" width="100%">
+              Restart game
+            </Button>
+          )}
         </Flex>
       </Flex>
     </Container>

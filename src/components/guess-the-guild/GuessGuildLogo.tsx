@@ -36,7 +36,6 @@ const GuessGuildLogo = ({
   const [{ isOver }, drop] = useDrop(() => ({
     accept: ItemTypes.ICON,
     drop: (item: { guild: GuildBase }, monitor) => {
-      console.log(item, "dropped")
       dropEvent && dropEvent(droppableData!.name, item.guild)
     },
     collect: (monitor) => ({
