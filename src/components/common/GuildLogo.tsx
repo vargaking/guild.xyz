@@ -9,6 +9,7 @@ type Props = {
   size?: ResponsiveValue<number | string>
   priority?: boolean
   highlight?: boolean
+  loadedEvent?: () => void
 } & Rest
 
 const GuildLogo = memo(
@@ -18,6 +19,7 @@ const GuildLogo = memo(
     size = "48px",
     priority = false,
     highlight = false,
+    loadedEvent,
     ...rest
   }: Props): JSX.Element => {
     const { colorMode } = useColorMode()
@@ -46,6 +48,7 @@ const GuildLogo = memo(
               style={{
                 objectFit: "cover",
               }}
+              onLoad={loadedEvent}
             />
           ))}
       </Circle>
