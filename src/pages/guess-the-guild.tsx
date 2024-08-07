@@ -4,10 +4,11 @@ import LinkPreviewHead from "components/common/LinkPreviewHead"
 import GameKickOff from "components/guess-the-guild/GameKickOff"
 import GuildPair from "components/guess-the-guild/GuildPair"
 import NameGuess from "components/guess-the-guild/NameGuess"
+import useLocalStorage from "hooks/useLocalStorage"
 import { GetStaticProps } from "next"
-import { useState } from "react"
-import { DndProvider } from "react-dnd"
-import { HTML5Backend } from "react-dnd-html5-backend"
+import { HTML5toTouch } from "rdndmb-html5-to-touch"
+import { useEffect, useState } from "react"
+import { DndProvider } from "react-dnd-multi-backend"
 import { GuildBase } from "types"
 import fetcher from "utils/fetcher"
 
@@ -18,8 +19,14 @@ type Props = {
 const Page = ({ guilds: guildsInitial }: Props) => {
   const bgColor = useColorModeValue("var(--chakra-colors-gray-100)", "#343439")
 
+  const [playableGuilds, setPlayableGuilds] = useState<GuildBase[]>(guildsInitial)
+
+  const [highScore, setHighScore] = useLocalStorage("highScore", 0)
+
   const [gameScore, setGameScore] = useState(-1) // -1 = kick off, >=0 = score
   const [gameMode, setGameMode] = useState(-1) // 0 = name, 1 = pairing
+
+  const [difficulty, setDifficulty] = useState("easy")
 
   // name game states
   const [correctGuild, setCorrectGuild] = useState<GuildBase>()
@@ -30,16 +37,17 @@ const Page = ({ guilds: guildsInitial }: Props) => {
 
   const forwardGame = () => {
     // choose game mode randomly
-    //const randomGameMode = Math.floor(Math.random() * 2)
-
-    const randomGameMode = 0
+    const randomGameMode = Math.floor(Math.random() * 2)
 
     if (randomGameMode === 0) {
       // Name game
-      const { correctGuild, nameOptions } = getGuildsNameGame()
-      console.log(correctGuild, nameOptions)
-      setCorrectGuild(correctGuild)
-      setNameOptions(nameOptions)
+
+      const guildNameGameData = getGuildsNameGame()
+
+      console.log(guildNameGameData)
+
+      setCorrectGuild(guildNameGameData.correctGuild)
+      setNameOptions(guildNameGameData.nameOptions)
     } else {
       // Pairing game
       const randomGuilds = getGuildsPairingGame()
@@ -49,7 +57,26 @@ const Page = ({ guilds: guildsInitial }: Props) => {
     setGameMode(randomGameMode)
   }
 
+  useEffect(() => {
+    console.log("playableGuilds", playableGuilds)
+  }, [playableGuilds])
+
   const startGame = () => {
+    if (difficulty === "easy") {
+      // set playable guilds to the first 10% of the total guilds
+      setPlayableGuilds(
+        guildsInitial.slice(0, Math.floor(guildsInitial.length * 0.1))
+      )
+    } else if (difficulty === "medium") {
+      // set playable guilds to the first 50% of the total guilds
+      setPlayableGuilds(
+        guildsInitial.slice(0, Math.floor(guildsInitial.length * 0.5))
+      )
+    } else {
+      // set playable guilds to all guilds
+      setPlayableGuilds(guildsInitial)
+    }
+
     // reset game states
     setGameScore(0)
 
@@ -62,6 +89,10 @@ const Page = ({ guilds: guildsInitial }: Props) => {
   }
 
   const restartGame = () => {
+    if (gameScore > highScore) {
+      setHighScore(gameScore)
+    }
+
     // reset game states
     setGameScore(-1)
 
@@ -80,35 +111,37 @@ const Page = ({ guilds: guildsInitial }: Props) => {
   const getGuildsNameGame = () => {
     const names: string[] = []
 
-    let correctGuild: GuildBase
+    let correctGuildChoice: GuildBase
 
     while (names.length < 4) {
-      const randomIndex = Math.floor(Math.random() * guildsInitial.length)
-      const randomName = guildsInitial[randomIndex].name
+      const randomIndex = Math.floor(Math.random() * playableGuilds.length)
+      const randomName = playableGuilds[randomIndex].name
       if (!names.includes(randomName)) {
-        names.push(randomName)
+        if (!playableGuilds[randomIndex].imageUrl?.match("guildLogos")) {
+          names.push(randomName)
 
-        if (names.length === 1) {
-          correctGuild = guildsInitial[randomIndex]
+          if (names.length === 1) {
+            correctGuildChoice = playableGuilds[randomIndex]
+          }
+
+          playableGuilds.splice(randomIndex, 1)
         }
-
-        guildsInitial.slice(randomIndex, 1)
       }
     }
 
     return {
-      correctGuild: correctGuild!,
+      correctGuild: correctGuildChoice!,
       nameOptions: names.sort(() => Math.random() - 0.5),
     }
   }
 
   const getGuildsPairingGame = () => {
-    const guildsCopy = [...guildsInitial]
+    const guildsCopy = [...playableGuilds]
     const randomGuilds = []
     while (randomGuilds.length < 4) {
       const randomIndex = Math.floor(Math.random() * guildsCopy.length)
       randomGuilds.push(guildsCopy.splice(randomIndex, 1)[0])
-      guildsInitial.splice(randomIndex, 1)
+      playableGuilds.splice(randomIndex, 1)
     }
     return randomGuilds
   }
@@ -126,7 +159,7 @@ const Page = ({ guilds: guildsInitial }: Props) => {
   console.log(guildsInitial)
 
   return (
-    <DndProvider backend={HTML5Backend}>
+    <DndProvider options={HTML5toTouch}>
       <LinkPreviewHead path="" />
       <Layout
         title={"Guess the Guild"}
@@ -134,6 +167,19 @@ const Page = ({ guilds: guildsInitial }: Props) => {
       >
         {gameScore >= 0 ? (
           <Box position="relative" width="80%" margin="0 auto">
+            <Container
+              backgroundColor={bgColor}
+              borderRadius="var(--chakra-radii-lg)"
+              position={{ base: "relative", lg: "absolute" }}
+              top="0"
+              right="0"
+              marginBottom={{ base: 4, lg: 0 }}
+              width="fit-content"
+              padding="var(--chakra-space-2) var(--chakra-space-4)"
+            >
+              Score: {gameScore}
+            </Container>
+
             {gameMode === 0 ? (
               <NameGuess
                 guild={correctGuild!}
@@ -149,21 +195,29 @@ const Page = ({ guilds: guildsInitial }: Props) => {
                 restartEvent={restartGame}
               />
             )}
-
+          </Box>
+        ) : (
+          <Box position="relative" width="90%" margin="0 auto">
             <Container
               backgroundColor={bgColor}
               borderRadius="var(--chakra-radii-lg)"
-              position="absolute"
+              position={{ base: "relative", lg: "absolute" }}
               top="0"
               right="0"
+              marginBottom={{ base: 4, lg: 0 }}
               width="fit-content"
               padding="var(--chakra-space-2) var(--chakra-space-4)"
+              suppressHydrationWarning={true}
             >
-              Score: {gameScore}
+              Highscore: {highScore || 0}
             </Container>
+
+            <GameKickOff
+              startGame={startGame}
+              difficulty={difficulty}
+              setDifficulty={setDifficulty}
+            />
           </Box>
-        ) : (
-          <GameKickOff startGame={startGame} />
         )}
       </Layout>
     </DndProvider>

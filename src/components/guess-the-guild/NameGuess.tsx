@@ -9,7 +9,7 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react"
 import GuildLogo from "components/common/GuildLogo"
-import { useEffect, useRef, useState } from "react"
+import { useState } from "react"
 import { GuildBase } from "types"
 
 type Props = {
@@ -26,11 +26,7 @@ const NameGuess = ({ guild, guildOptions, correctAction, restartEvent }: Props) 
 
   const [incorrectButtonIndex, setIncorrectButtonIndex] = useState(-1)
 
-  const imageLoaded = useRef(false)
-
-  useEffect(() => {
-    console.log("img loaded")
-  }, [imageLoaded.current])
+  const [imageLoaded, setImageLoaded] = useState(false)
 
   // for debugging
   console.log(guild, "current guild")
@@ -41,11 +37,12 @@ const NameGuess = ({ guild, guildOptions, correctAction, restartEvent }: Props) 
 
       setTimeout(() => {
         setCorrectButtonIndex(-1)
-        imageLoaded.current = false
+        setImageLoaded(false)
         correctAction(1)
       }, 1000)
     } else {
       setIncorrectButtonIndex(index)
+
       setCorrectButtonIndex(
         guildOptions.findIndex((option) => option === guild.name)
       )
@@ -54,7 +51,7 @@ const NameGuess = ({ guild, guildOptions, correctAction, restartEvent }: Props) 
 
   return (
     <>
-      <Stack hidden={!imageLoaded.current} w="fit-content" margin="0 auto">
+      <Stack hidden={imageLoaded} w="fit-content" margin="0 auto">
         <Flex
           alignItems="center"
           justifyContent="center"
@@ -82,7 +79,7 @@ const NameGuess = ({ guild, guildOptions, correctAction, restartEvent }: Props) 
       </Stack>
 
       <Container
-        hidden={imageLoaded.current}
+        visibility={imageLoaded ? "visible" : "hidden"}
         w="fit-content"
         borderRadius="lg"
         bg={bgColor}
@@ -96,7 +93,10 @@ const NameGuess = ({ guild, guildOptions, correctAction, restartEvent }: Props) 
         >
           <Heading size={"lg"}>Guess the guild by the logo</Heading>
           <GuildLogo
-            loadedEvent={() => (imageLoaded.current = true)}
+            loadedEvent={() => {
+              console.log("imageee loaded 2")
+              setImageLoaded(true)
+            }}
             imageUrl={guild.imageUrl}
             size={"100px"}
           />
@@ -123,13 +123,12 @@ const NameGuess = ({ guild, guildOptions, correctAction, restartEvent }: Props) 
                 {option}
               </Button>
             ))}
-
-            {incorrectButtonIndex !== -1 && (
-              <Button onClick={restartEvent} colorScheme="blue" width="100%">
-                Restart game
-              </Button>
-            )}
           </Flex>
+          {incorrectButtonIndex !== -1 && (
+            <Button onClick={restartEvent} colorScheme="blue" width="100%">
+              Restart game
+            </Button>
+          )}
         </Flex>
       </Container>
     </>

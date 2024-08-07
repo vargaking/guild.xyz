@@ -48,7 +48,11 @@ const GuildLogo = memo(
               style={{
                 objectFit: "cover",
               }}
-              onLoad={loadedEvent}
+              onLoad={() => {
+                if (loadedEvent) {
+                  loadedEvent()
+                }
+              }}
             />
           ))}
       </Circle>

@@ -48,7 +48,7 @@ const GuildPair = ({
 
   const dropEvent = (placeName: string) => {
     setGuildGuesses((prevGuildGuesses) => {
-      let newGuildGuesses = [...prevGuildGuesses]
+      const newGuildGuesses = [...prevGuildGuesses]
 
       console.log(prevGuildGuesses, "debugggggg")
       console.log(placeName, "placeName")
@@ -74,19 +74,19 @@ const GuildPair = ({
   }
 
   const checkResults = () => {
-    let incorrectIndexes: number[] = []
+    const incorrectIndexesTemp: number[] = []
 
     guildGuesses.forEach((guess, index) => {
       if (
         guess.guess !== guildsToDrop.findIndex((guild) => guild.name === guess.name)
       ) {
-        incorrectIndexes.push(index)
+        incorrectIndexesTemp.push(index)
       }
     })
 
-    setIncorrectIndexes(incorrectIndexes)
+    setIncorrectIndexes(incorrectIndexesTemp)
 
-    if (incorrectIndexes.length === 0) {
+    if (incorrectIndexesTemp.length === 0) {
       toast({
         title: "Correct answer!",
         description: "You paired all the logos correctly",
@@ -141,8 +141,8 @@ const GuildPair = ({
           alignItems="center"
           width="100%"
         >
-          {guildsToDrop.map((guild, index) => {
-            return (
+          {guildsToDrop.map(
+            (guild, index) =>
               !guildGuesses.some((guess) => guess.guess === index) && (
                 <GuessGuildLogo
                   guild={guild}
@@ -151,8 +151,7 @@ const GuildPair = ({
                   setGrabbedIndex={updateGrabbedIndex}
                 />
               )
-            )
-          })}
+          )}
         </Flex>
         <Flex
           gap={2}
