@@ -7,7 +7,7 @@ import NameGuess from "components/guess-the-guild/NameGuess"
 import useLocalStorage from "hooks/useLocalStorage"
 import { GetStaticProps } from "next"
 import { HTML5toTouch } from "rdndmb-html5-to-touch"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { DndProvider } from "react-dnd-multi-backend"
 import { GuildBase } from "types"
 import fetcher from "utils/fetcher"
@@ -44,8 +44,6 @@ const Page = ({ guilds: guildsInitial }: Props) => {
 
       const guildNameGameData = getGuildsNameGame()
 
-      console.log(guildNameGameData)
-
       setCorrectGuild(guildNameGameData.correctGuild)
       setNameOptions(guildNameGameData.nameOptions)
     } else {
@@ -56,10 +54,6 @@ const Page = ({ guilds: guildsInitial }: Props) => {
 
     setGameMode(randomGameMode)
   }
-
-  useEffect(() => {
-    console.log("playableGuilds", playableGuilds)
-  }, [playableGuilds])
 
   const startGame = () => {
     if (difficulty === "easy") {
@@ -155,8 +149,6 @@ const Page = ({ guilds: guildsInitial }: Props) => {
     }
     return mixedGuilds
   }
-
-  console.log(guildsInitial)
 
   return (
     <DndProvider options={HTML5toTouch}>

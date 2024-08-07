@@ -28,9 +28,6 @@ const NameGuess = ({ guild, guildOptions, correctAction, restartEvent }: Props) 
 
   const [imageLoaded, setImageLoaded] = useState(false)
 
-  // for debugging
-  console.log(guild, "current guild")
-
   const guessName = (name: string, index: number) => {
     if (name === guild.name) {
       setCorrectButtonIndex(index)
@@ -94,7 +91,6 @@ const NameGuess = ({ guild, guildOptions, correctAction, restartEvent }: Props) 
           <Heading size={"lg"}>Guess the guild by the logo</Heading>
           <GuildLogo
             loadedEvent={() => {
-              console.log("imageee loaded 2")
               setImageLoaded(true)
             }}
             imageUrl={guild.imageUrl}
@@ -116,8 +112,8 @@ const NameGuess = ({ guild, guildOptions, correctAction, restartEvent }: Props) 
                   index === correctButtonIndex
                     ? "green"
                     : index === incorrectButtonIndex
-                    ? "red"
-                    : "gray"
+                      ? "red"
+                      : "gray"
                 }
               >
                 {option}

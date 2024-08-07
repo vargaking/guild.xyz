@@ -36,10 +36,6 @@ const GuildPair = ({
     grabbedIndexRef.current = index
   }
 
-  //for debugging
-  console.log(guildsToDrop, "guildsToDrop")
-  console.log(guildPlaces, "guildPlaces")
-
   const [guildGuesses, setGuildGuesses] = useState(
     guildPlaces.map((item) => {
       return { ...item, guess: -1 }
@@ -50,12 +46,8 @@ const GuildPair = ({
     setGuildGuesses((prevGuildGuesses) => {
       const newGuildGuesses = [...prevGuildGuesses]
 
-      console.log(prevGuildGuesses, "debugggggg")
-      console.log(placeName, "placeName")
-
       // find the guild with the placeName and add the droppedName to the guess
       const index = newGuildGuesses.findIndex((item) => item.name === placeName)
-      console.log(index, "index")
 
       newGuildGuesses[index].guess = -1
 
@@ -106,8 +98,6 @@ const GuildPair = ({
   const [isSubmitButtonDisabled, setIsSubmitButtonDisabled] = useState(true)
 
   useEffect(() => {
-    console.log("guildguesses changed", guildGuesses)
-
     if (guildGuesses.every((guess) => guess.guess !== -1)) {
       setIsSubmitButtonDisabled(false)
     } else {
@@ -116,7 +106,6 @@ const GuildPair = ({
   }, [guildGuesses])
 
   useEffect(() => {
-    console.log("resetting guesses")
     setIncorrectIndexes([])
     setGuildGuesses(
       guildPlaces.map((item) => {
