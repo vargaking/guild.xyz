@@ -8,6 +8,8 @@ type Props = {
   imageQuality?: number
   size?: ResponsiveValue<number | string>
   priority?: boolean
+  highlight?: boolean
+  loadedEvent?: () => void
 } & Rest
 
 const GuildLogo = memo(
@@ -16,6 +18,8 @@ const GuildLogo = memo(
     imageQuality = 70,
     size = "48px",
     priority = false,
+    highlight = false,
+    loadedEvent,
     ...rest
   }: Props): JSX.Element => {
     const { colorMode } = useColorMode()
@@ -23,7 +27,9 @@ const GuildLogo = memo(
     return (
       <Circle
         position="relative"
-        bgColor={colorMode === "light" ? "gray.700" : "gray.600"}
+        bgColor={
+          highlight ? "gray.400" : colorMode === "light" ? "gray.700" : "gray.600"
+        }
         size={size}
         overflow="hidden"
         {...rest}
@@ -41,6 +47,11 @@ const GuildLogo = memo(
               sizes={typeof size === "string" ? size : Object.values(size).at(-1)}
               style={{
                 objectFit: "cover",
+              }}
+              onLoad={() => {
+                if (loadedEvent) {
+                  loadedEvent()
+                }
               }}
             />
           ))}
