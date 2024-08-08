@@ -32,7 +32,6 @@ import { walletLinkHelperModalAtom } from "../WalletLinkHelperModal"
 import AccountButton from "./components/AccountButton"
 import ConnectorButton from "./components/ConnectorButton"
 import FuelConnectorButtons from "./components/FuelConnectorButtons"
-import GoogleLoginButton from "./components/GoogleLoginButton"
 import useIsWalletConnectModalActive from "./hooks/useIsWalletConnectModalActive"
 import useLinkAddress from "./hooks/useLinkAddress"
 import processConnectionError from "./utils/processConnectionError"
@@ -164,27 +163,27 @@ const WalletSelectorModal = ({ isOpen, onClose }: Props): JSX.Element => {
           <ErrorComponent
             {...(set.error || linkAddress.error
               ? {
-                  error: set.error ?? linkAddress.error,
-                  processError: (err: any) => {
-                    if (err?.code === "ACTION_REJECTED") {
-                      return {
-                        title: "Rejected",
-                        description: "Signature request has been rejected",
-                      }
-                    }
-
+                error: set.error ?? linkAddress.error,
+                processError: (err: any) => {
+                  if (err?.code === "ACTION_REJECTED") {
                     return {
-                      title: "Error",
-                      description:
-                        err?.message ??
-                        (typeof err?.error === "string"
-                          ? err?.error
-                          : typeof err === "string"
+                      title: "Rejected",
+                      description: "Signature request has been rejected",
+                    }
+                  }
+
+                  return {
+                    title: "Error",
+                    description:
+                      err?.message ??
+                      (typeof err?.error === "string"
+                        ? err?.error
+                        : typeof err === "string"
                           ? err
                           : err?.errors?.[0]?.msg),
-                    }
-                  },
-                }
+                  }
+                },
+              }
               : { error, processError: processConnectionError })}
           />
           {shouldShowVerify && (
@@ -247,7 +246,6 @@ const WalletSelectorModal = ({ isOpen, onClose }: Props): JSX.Element => {
                     />
                   </CardMotionWrapper>
                 ))}
-              <GoogleLoginButton />
               <FuelConnectorButtons key="fuel" />
             </Stack>
           )}
